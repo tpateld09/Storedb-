@@ -117,7 +117,7 @@ SELECT
 The final query successfully combines the four tables and displays customer, order, product, quantity, price, and total price.
 <img width="910" height="446" alt="Screenshot 2026-09-22 144813" src="https://github.com/user-attachments/assets/e35180e1-dbf0-492e-aac6-1f6144a9f569" />
 
-## 6. Learning & What I Learned
+## 6. Learning 
 Through this project, I learned how to:
 
 --Create related tables using Primary Keys and Foreign Keys
