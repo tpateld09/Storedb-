@@ -1,96 +1,127 @@
-# Shopping Store SQL --- Relationships Project
+# Shopping Store SQL — Many-to-Many Relationship
 
-## Project Overview
+## 1. Project Overview / Objective
 
-**Project**: Shopping Store Database --- One-to-Many & Many-to-Many
-Relationships
-**Project Type**: SQL Learning Project
-**Project Number**: 2
-**Database**: PostgreSQL
-**Level**: Beginner / Intermediate SQL Practice
+This is my **second SQL learning project**, created to practice **one-to-many and many-to-many relationships** using PostgreSQL.
 
-This project is a small PostgreSQL database designed to practice how
-multiple related tables work together in a shopping-store context.
+The project uses four tables — `customers`, `orders`, `products`, and `order_items` — to model a simple shopping-store database and retrieve customer order details along with the products purchased.
 
-~~~The project uses four tables:
+---
 
-customers
+## 2. Database Design
 
-orders
+The database contains four related tables:
 
-products
+- `customers` — stores customer details
+- `orders` — stores customer orders
+- `products` — stores product names and prices
+- `order_items` — connects orders with products and stores the quantity purchased
 
-order_items
-~~~
+### SQL Table Creation
 
-The main focus is understanding Primary Keys, Foreign Keys,
-one-to-many relationships, many-to-many relationships, JOINs, and
-calculated values.
+```sql
+--customers
+CREATE TABLE customers 
+(
+    cust_id SERIAL PRIMARY KEY,
+    cust_name VARCHAR(100) NOT NULL
+);
 
-1. ## Project Objective
+INSERT INTO customers (cust_name)
+VALUES ('Raju'), ('Sham'), ('Paul'), ('Alex');
+ 
+ --orders
+CREATE TABLE orders 
+(
+    ord_id SERIAL PRIMARY KEY,
+    ord_date DATE NOT NULL,
+    cust_id INTEGER NOT NULL,
+    FOREIGN KEY (cust_id) REFERENCES customers(cust_id)
+);
 
-Create a small shopping-store database using SQL to demonstrate
-one-to-many and many-to-many relationships using four related
-tables.
+INSERT INTO orders (ord_date, cust_id)
+VALUES
+    ('2024-01-01', 1),  -- Raju first order
+    ('2024-02-01', 2),  -- Sham first order
+    ('2024-03-01', 3),  -- Paul first order
+    ('2024-04-04', 2);  -- Sham second order
 
-The database should allow us to connect:
+--products 
+CREATE TABLE products 
+(   
+     P_id SERIAL PRIMARY KEY,
+	 p_name VARCHAR(100) NOT NULL,
+	 price NUMERIC NOT NULL
+);
 
-Customers with their orders
-Orders with the products they contain
-Products with their prices
-Quantities of products purchased in each order
-
-The final query should display the customer, order, product, quantity,
-price, and total price for each order item.
-
-2. ## Database Design
-
-### Customers
-
-Stores information about customers.
-
-Column        Description
-
-cust_id     Primary key identifying each customer
-cust_name   Customer name
-~~~
+INSERT INTO products (p_name, price)
+VALUES
+    ('Laptop', 55000.00),
+    ('Mouse', 500),
+    ('Keyboard', 800.00),
+    ('Cable', 250.00)
+;
 
 
+--ORDER_ITEMS
+CREATE TABLE order_items 
+(   
+   items_id SERIAL PRIMARY KEY,
+	 ord_id INT NOT NULL,
+	 p_id INT NOT NULL,
+	 quantity INT NOT NULL,
+	 FOREIGN KEY (ord_id) REFERENCES orders(ord_id),
+     FOREIGN KEY (p_id) REFERENCES products(P_id)
+);
 
-~~~
+INSERT INTO order_items (ord_id, p_id, quantity)
+VALUES
+    (1, 1, 1),  -- Raju ordered 1 Laptop
+    (1, 4, 2),  -- Raju ordered 2 Cables
+    (2, 1, 1),  -- Sham ordered 1 Laptop
+    (3, 2, 1),  -- Paul ordered 1 Mouse
+    (3, 4, 5),  -- Paul ordered 5 Cables
+    (4, 3, 1);  -- Sham ordered 1 Keyboard
+ 
+```
+## 3.Relationship Design
+One-to-Many
 
+One customer can place multiple orders.
+<img width="707" height="302" alt="Screenshot 2026-09-22 132911" src="https://github.com/user-attachments/assets/8bf6b26f-14b9-4020-aff6-9e1492bec37e" />
 
-### Orders
+Many-to-Many
+One order can contain multiple products, and one product can appear in multiple orders.
 
-Stores information about orders placed by customers.
+The order_items table acts as the bridge table.
+<img width="1006" height="622" alt="Screenshot 2026-09-22 132751" src="https://github.com/user-attachments/assets/2b6ef113-1760-4f08-bc3b-2559f5efbf53" />
 
-Column       Description
+### Final Query
+```
+SELECT 
+       c.cust_name, 
+       o.ord_date, 
+	     p.p_name,
+	     p.price, 
+	     oi.quantity,
+	     oi.quantity*p.price as total_price 
+ FROM order_items oi 
+    INNER JOIN
+	    products p ON oi.p_id=p.p_id
+	  INNER JOIN
+	      orders o ON o.ord_id=oi.ord_id
+	  INNER JOIN 
+	      customers c ON o.cust_id=c.cust_id;
+```
+## 5. Result
+The final query successfully combines the four tables and displays customer, order, product, quantity, price, and total price.
+<img width="910" height="446" alt="Screenshot 2026-09-22 144813" src="https://github.com/user-attachments/assets/e35180e1-dbf0-492e-aac6-1f6144a9f569" />
 
-ord_id     Primary key identifying each order
-ord_date   Date of the order
-cust_id    Foreign key referencing customers
+## 6. Learning & What I Learned
+Through this project, I learned how to:
 
-### Products
-
-Stores information about products available in the store.
-
-Column     Description
-
-p_id     Primary key identifying each product
-p_name   Product name
-price    Price of the product
-
-### Order_Items
-
-Acts as the bridge/junction table between orders and products.
-
-Column       Description
-
-items_id   Primary key identifying each order-item record
-ord_id     Foreign key referencing orders
-p_id       Foreign key referencing products
-quantity   Quantity of the product purchased
-
-3. ## Relationship Design
-<img width="1487" height="401" alt="Screenshot 2026-09-21 215111" src="https://github.com/user-attachments/assets/a20c65b8-5d10-4424-97ad-2f15fb27c639" />
-
+--Create related tables using Primary Keys and Foreign Keys
+--Understand one-to-many relationships
+--Implement many-to-many relationships using a bridge table
+--Use JOIN to combine data from multiple tables
+--Create calculated columns using SQL expressions
